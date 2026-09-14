@@ -6,6 +6,23 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 
+const DEFAULT_PROFILE_IMAGE =
+  "https://res.cloudinary.com/dqlasoiaw/image/upload/v1686688962/tech-social/blank-profile-picture-973460_1280_d1qnjd.png";
+
+const getSafeImageSrc = (value) => {
+  if (typeof value !== "string" || value.trim() === "") return null;
+
+  try {
+    const parsed = new URL(value, window.location.origin);
+    const isHttp = parsed.protocol === "http:" || parsed.protocol === "https:";
+    const isRelative = value.startsWith("/");
+
+    return isHttp || isRelative ? parsed.href : null;
+  } catch {
+    return null;
+  }
+};
+
 const Navbar = () => {
   const { user, logOut, query, setQuery } = useContext(AuthContext);
 
@@ -18,6 +35,10 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const navbarNode = useOutsideClick(() => setShowProfile(false));
+  const profileImageSrc =
+    getSafeImageSrc(user?.photoURL) ||
+    getSafeImageSrc(userData?.photoURL) ||
+    DEFAULT_PROFILE_IMAGE;
 
   return (
     <div className="navbar">
@@ -45,11 +66,7 @@ const Navbar = () => {
         <div className="right-nav">
           <div className="profile-image-container">
             <img
-              src={
-                user?.photoURL ||
-                userData?.photoURL ||
-                `https://res.cloudinary.com/dqlasoiaw/image/upload/v1686688962/tech-social/blank-profile-picture-973460_1280_d1qnjd.png`
-              }
+              src={profileImageSrc}
               alt={user?.displayName}
               onClick={(e) => {
                 e.stopPropagation();
